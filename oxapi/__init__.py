@@ -7,6 +7,7 @@ __author__ = 'Bernd Strebel'
 PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from .session import OxHttpAPI
+from .sync import OxSync
 from .beans import OxBean
 from .beans import OxBeans
 from .folders import OxFolder
@@ -19,6 +20,7 @@ from .attachment import OxAttachments
 __all__ = [
 
     'OxHttpAPI',
+    'OxSync',
     'OxBean',
     'OxBeans',
     'OxFolder',
