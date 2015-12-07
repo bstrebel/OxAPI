@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys,os,requests,json
+import sys, os, requests, json, re
 
 class OxHttpAPI(object):
 
@@ -14,8 +14,10 @@ class OxHttpAPI(object):
             if not server: server = os.environ.get('OX_SERVER')
             if not user: user = os.environ.get('OX_USER')
             if not password: password = os.environ.get('OX_PASSWORD')
-            OxHttpAPI._session = OxHttpAPI(server)
-            OxHttpAPI._session.login(user, password)
+            if server:
+                OxHttpAPI._session = OxHttpAPI(server)
+                if user:
+                    OxHttpAPI._session.login(user, password)
         return OxHttpAPI._session
 
     @staticmethod
@@ -192,6 +194,19 @@ class OxHttpAPI(object):
             if folder.standard_folder:
                 return self.get_folder_by_id(folder.id)
 
+    def get_folder(self, type, guess=None):
+
+        if guess is None:
+            return self.get_standard_folder(type)
+
+        if isinstance(guess, int):
+            guess = str(guess)
+
+        if re.match('^\d+$', guess):
+            return self.get_folder_by_id(guess)
+        else:
+            return self.get_folder_by_name(guess, type)
+
     """ Public task module wrapper """
 
     def get_tasks(self, folder):
@@ -205,7 +220,8 @@ class OxHttpAPI(object):
     def delete_task(self, folder, id):
         from oxapi import OxTasks, OxTask
         task = self._get_beans(OxTasks, 'get', {'id': id, 'folder': folder})
-        return self._get_beans(OxTasks, 'delete', {'id': id, 'folder': folder})
+        return task.delete()
+        #return self._get_beans(OxTasks, 'delete', {'id': id, 'folder': folder})
 
     """ Attachment module wrapper """
 

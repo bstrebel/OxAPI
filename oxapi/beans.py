@@ -45,6 +45,9 @@ class OxBean(object):
     @property
     def module_name(self): return self._module_name
 
+    @property
+    def timestamp(self): return self._timestamp
+
     def data(self, data):
         self._data.update(data)
 
@@ -67,7 +70,7 @@ class OxBean(object):
             data = {'id': self.id,
                     'folder': self.folder_id}
             params = {'timestamp': self._timestamp}
-            result = ox.put(self._module, 'delete', params, data)
+            result = ox.put(self._module_name, 'delete', params, data)
         return result
 
     def get(self, ox=None):
@@ -75,7 +78,7 @@ class OxBean(object):
         if ox and self._data:
             params = {'id': self.id,
                     'folder': self.folder_id}
-            content = ox.get(self._module, 'get', params)
+            content = ox.get(self._module_name, 'get', params)
             if content:
                 self._timestamp = content.get('timestamp', None)
                 self._data = content.get('data', None)
@@ -83,10 +86,12 @@ class OxBean(object):
     def create(self, ox=None):
         if not ox: ox=self._ox
         if ox and self._data:
-            content = ox.put(self._module, 'new', None, self._data)
+            content = ox.put(self._module_name, 'new', None, self._data)
             if content:
                 self._timestamp = content.get('timestamp', None)
                 self._data.update(content.get('data',{}))
+                return self.id, self._timestamp
+        return None, None
 
     def update(self, ox=None):
         if not ox: ox=self._ox
@@ -94,9 +99,10 @@ class OxBean(object):
             params = {'id': self.id,
                       'folder': self.folder_id,
                       'timestamp': self._timestamp}
-            content = ox.put(self._module, 'update', params, self._data)
+            content = ox.put(self._module_name, 'update', params, self._data)
             if content:
                 self._timestamp = content.get('timestamp', None)
+        return self._timestamp
 
     def upload(self, args=[{'content':None,'file':None, 'mimetype':'text/plain','name':'attachment.txt'}]):
 
@@ -175,7 +181,15 @@ class OxBean(object):
 class OxBeans(object):
 
     def __init__(self, ox):
-        self._ox = ox
+
+        if ox:
+            if isinstance(ox, OxHttpAPI):
+                self._ox = ox
+            else:
+                self._ox = OxHttpAPI.get_session(**ox)
+        else:
+            self._ox = OxHttpAPI.get_session()
+
         self._timestamp = None
         self._content = None
         self._raw = None
