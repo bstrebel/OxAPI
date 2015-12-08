@@ -15,7 +15,7 @@ from .tasks import OxTask
 from .tasks import OxTasks
 from .attachment import OxAttachment
 from .attachment import OxAttachments
-from .sync import OxTaskSync
+from oxsync.sync import OxTaskSync
 
 __all__ = [
 
