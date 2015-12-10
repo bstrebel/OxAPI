@@ -6,6 +6,17 @@ from oxapi import *
 
 class OxTask(OxBean):
 
+    @staticmethod
+    def status(key):
+        task_status = ['unknown', 'not started', 'in progress', 'done', 'waiting', 'deferred']
+        if isinstance(key, int):
+            if key < len(task_status):
+                return task_status[key]
+        else:
+            if key in task_status:
+                return task_status.index(key)
+        return None
+
     module_name = 'tasks'
     module_type = 4
 
@@ -36,8 +47,6 @@ class OxTask(OxBean):
         self._attachments = None
         self._path = None
         OxBean.__init__(self, data, ox, timestamp)
-
-
 
 
 class OxTasks(OxBeans):

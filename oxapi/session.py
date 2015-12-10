@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, time, requests, json, re
+import sys, os, time, requests, json, re, logging
 
 class OxHttpAPI(object):
 
@@ -9,13 +9,14 @@ class OxHttpAPI(object):
     _session = None
 
     @staticmethod
-    def get_session(server=None, user=None, password=None):
+    def get_session(server=None, user=None, password=None, logger=None):
         if not OxHttpAPI._session:
             if not server: server = os.environ.get('OX_SERVER')
             if not user: user = os.environ.get('OX_USER')
             if not password: password = os.environ.get('OX_PASSWORD')
+            if not logger: logger = logging.getLogger('oxapi')
             if server:
-                OxHttpAPI._session = OxHttpAPI(server)
+                OxHttpAPI._session = OxHttpAPI(server, logger=logger)
                 if user:
                     OxHttpAPI._session.login(user, password)
         return OxHttpAPI._session
@@ -24,7 +25,7 @@ class OxHttpAPI(object):
     def set_session(ox):
         OxHttpAPI._session = ox
 
-    def __init__(self, server, user=None, password=None):
+    def __init__(self, server, user=None, password=None, logger=None):
 
         self._server = server
         self._user = user
@@ -33,6 +34,7 @@ class OxHttpAPI(object):
         self._cookies = None
         self._offline = None
         self._utc_offset = None
+        self._logger = logger
 
     def __enter__(self):
         return self
@@ -40,6 +42,9 @@ class OxHttpAPI(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.authenticated:
             self.logout()
+
+    @property
+    def logger(self): return self._logger
 
     @property
     def authenticated(self): return self._session is not None
@@ -53,10 +58,10 @@ class OxHttpAPI(object):
     @property
     def utc_offset(self):
         if self._utc_offset is None:
-            result = ox.get('config/currentTime')
+            result = self.get('config/currentTime')
             local = result['data']/1000
             utc = long(time.time())
-        self._utc_offset = long(round((utc-local),-1)*1000)
+            self._utc_offset = long(round((utc-local),-1) * 1000)
         return self._utc_offset
 
     def _response(self, response):
@@ -103,6 +108,7 @@ class OxHttpAPI(object):
         try:
             self._offline = True
             response = call(self._url(module, action), cookies=self._cookies, params=self._params(params), data=data)
+            self.logger.debug('_request')
         except requests.exceptions.RequestException as e:
             print e
             return None
