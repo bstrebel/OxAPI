@@ -79,7 +79,10 @@ class OxHttpAPI(object):
         :param action:
         :return: formatted URL
         """
-        return self._server + '/ajax/' + module + '?action=' + action
+        url = self._server + '/ajax/' + module
+        if action:
+            url += '?action=' + action
+        return url
 
     def _params(self, params=None):
         if params is None: params = {}
@@ -96,7 +99,7 @@ class OxHttpAPI(object):
         self._offline = False
         return self._response(response)
 
-    def get(self, module, action, params):
+    def get(self, module, action=None, params=None):
         return self._request(requests.get, module, action, params)
 
     def post(self, module, action, params):

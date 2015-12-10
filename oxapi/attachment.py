@@ -35,13 +35,22 @@ class OxAttachment(OxBean):
                           'id': self.id,
                           'folder': self.folder}
 
-                document = self._ox.get(self._module, 'document', params)
+                document = self._ox.get(self.module_name, 'document', params)
                 if document:
                     #self._timestamp = content.get('timestamp', None)
                     self._document = document
 
         return self._document
 
+    def detach(self):
+        if self._data:
+            params = {'module': self.module,
+                      'attached': self.attached,
+                      'folder': self.folder}
+            body = []
+            body.append(self.id)
+            result = self._ox.put(self.module_name,'detach', params, body)
+            pass
 
 class OxAttachments(OxBeans):
 

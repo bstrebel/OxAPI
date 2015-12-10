@@ -15,19 +15,16 @@ from .tasks import OxTask
 from .tasks import OxTasks
 from .attachment import OxAttachment
 from .attachment import OxAttachments
-from oxsync.sync import OxTaskSync
 
 __all__ = [
 
     'OxHttpAPI',
-    'OxSync',
     'OxBean',
     'OxBeans',
     'OxFolder',
     'OxFolders',
     'OxTask',
     'OxTasks',
-    'OxTaskSync',
     'OxAttachment',
     'OxAttachments'
 ]

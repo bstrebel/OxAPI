@@ -48,6 +48,10 @@ class OxBean(object):
     @property
     def timestamp(self): return self._timestamp
 
+    @property
+    def url(self):
+        return "http://ox.digitec.de"
+
     def data(self, data):
         self._data.update(data)
 
@@ -57,11 +61,27 @@ class OxBean(object):
         else:
             return self._data[self.index(key)]
 
+    # def __setitem__(self, key, value):
+    #     if isinstance(self._data, dict):
+    #         self._data[key] = value
+    #     else:
+    #         self._data[self.index(key)] = value
+
     def __getattr__(self, key):
         if isinstance(self._data, dict):
-            return self._data.get(key, None)
+            return self._data.get(key)
         else:
             return self._data[self.index(key)]
+
+    # def __setattr__(self, key, value):
+    #     if key in self.map:
+    #         if isinstance(self._data, dict):
+    #             self._data[key] = value
+    #         else:
+    #             self._data[self.index(key)] = value
+    #     else:
+    #         self.__dict__[key] = value
+    #         super(OxBean, self).__setattr__(key, value)
 
     def delete(self, ox=None):
         if not ox: ox=self._ox
@@ -73,6 +93,7 @@ class OxBean(object):
             result = ox.put(self._module_name, 'delete', params, data)
         return result
 
+
     def get(self, ox=None):
         if not ox: ox=self._ox
         if ox and self._data:
@@ -82,6 +103,10 @@ class OxBean(object):
             if content:
                 self._timestamp = content.get('timestamp', None)
                 self._data = content.get('data', None)
+        return self
+
+    def load(self, ox=None):
+        return self.get(ox)
 
     def create(self, ox=None):
         if not ox: ox=self._ox
@@ -90,8 +115,9 @@ class OxBean(object):
             if content:
                 self._timestamp = content.get('timestamp', None)
                 self._data.update(content.get('data',{}))
-                return self.id, self._timestamp
-        return None, None
+                # return self.id, self._timestamp
+                return self
+        return None
 
     def update(self, ox=None):
         if not ox: ox=self._ox
@@ -102,7 +128,7 @@ class OxBean(object):
             content = ox.put(self._module_name, 'update', params, self._data)
             if content:
                 self._timestamp = content.get('timestamp', None)
-        return self._timestamp
+        return self
 
     def upload(self, args=[{'content':None,'file':None, 'mimetype':'text/plain','name':'attachment.txt'}]):
 
