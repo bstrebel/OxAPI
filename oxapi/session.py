@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, requests, json, re
+import sys, os, time, requests, json, re
 
 class OxHttpAPI(object):
 
@@ -32,6 +32,7 @@ class OxHttpAPI(object):
         self._session = None
         self._cookies = None
         self._offline = None
+        self._utc_offset = None
 
     def __enter__(self):
         return self
@@ -48,6 +49,15 @@ class OxHttpAPI(object):
 
     @property
     def online(self): return self._offline == False
+
+    @property
+    def utc_offset(self):
+        if self._utc_offset is None:
+            result = ox.get('config/currentTime')
+            local = result['data']/1000
+            utc = long(time.time())
+        self._utc_offset = long(round((utc-local),-1)*1000)
+        return self._utc_offset
 
     def _response(self, response):
         """
