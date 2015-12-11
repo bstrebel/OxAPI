@@ -62,6 +62,7 @@ class OxHttpAPI(object):
             local = result['data']/1000
             utc = long(time.time())
             self._utc_offset = long(round((utc-local),-1) * 1000)
+            self.logger.info('UTC offset set to %d milliseconds' % (self._utc_offset))
         return self._utc_offset
 
     def _response(self, response):
@@ -97,31 +98,36 @@ class OxHttpAPI(object):
         url = self._server + '/ajax/' + module
         if action:
             url += '?action=' + action
+        self.logger.debug("Request url: %s" % (url))
         return url
 
     def _params(self, params=None):
         if params is None: params = {}
         params['session'] = self._session
+        self.logger.debug("Request params: %s" % (params))
         return params
 
     def _request(self, call, module, action, params, data=None):
         try:
             self._offline = True
             response = call(self._url(module, action), cookies=self._cookies, params=self._params(params), data=data)
-            self.logger.debug('_request')
+            self.logger.debug('Request url: %s' % (response.request.path_url))
         except requests.exceptions.RequestException as e:
-            print e
+            self.logger.error("Request exception: %s" % (e))
             return None
         self._offline = False
         return self._response(response)
 
     def get(self, module, action=None, params=None):
+        self.logger.debug("Request type: GET")
         return self._request(requests.get, module, action, params)
 
     def post(self, module, action, params):
+        self.logger.debug("Request type: POST")
         return self._request(requests.post, module, action, params)
 
     def put(self, module, action, params, data=None):
+        self.logger.debug("Request type: PUT")
         body = data
         if data:
             if isinstance(data, dict):
@@ -138,12 +144,16 @@ class OxHttpAPI(object):
 
         content = self.post('login', 'login', params)
         if 'session' in content:
+            self.logger.info("User %s successfully logged in at %s!" % (user, self._server))
             self._session = content['session']
+        else:
+            self.logger.error("Login for %s at %s failed!" % (user, self._server))
 
     def logout(self):
         self.get('login', 'logout', {})
         self._session = None
         self._cookies = None
+        self.logger.info("User %s logged out!" % (self._user))
 
     def _get_beans(self, beans, action, params={}):
         """

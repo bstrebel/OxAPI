@@ -50,7 +50,12 @@ class OxBean(object):
 
     @property
     def url(self):
-        return "http://ox.digitec.de"
+        # https://ox.digitec.de/appsuite/#!&app=io.ox/tasks&folder=1963&id=1963.43941
+        return "%s/appsuite/#!&app=io.ox/%s&folder=%s&id=%s.%s" % (self._ox.server,
+                                                                   self.module_name,
+                                                                   self.folder_id,
+                                                                   self.folder_id,
+                                                                   self.id)
 
     def data(self, data):
         self._data.update(data)
