@@ -40,6 +40,9 @@ class OxBean(object):
         self._data = data
 
     @property
+    def ox(self): return self._ox
+
+    @property
     def module_type(self): return self._module_type
 
     @property
@@ -48,14 +51,15 @@ class OxBean(object):
     @property
     def timestamp(self): return self._timestamp
 
-    @property
-    def url(self):
+    def get_url(self):
         # https://ox.digitec.de/appsuite/#!&app=io.ox/tasks&folder=1963&id=1963.43941
-        return "%s/appsuite/#!&app=io.ox/%s&folder=%s&id=%s.%s" % (self._ox.server,
+
+        url =  "%s/appsuite/#!&app=io.ox/%s&folder=%s&id=%s.%s" % (self.ox.server,
                                                                    self.module_name,
                                                                    self.folder_id,
                                                                    self.folder_id,
                                                                    self.id)
+        return url
 
     def data(self, data):
         self._data.update(data)

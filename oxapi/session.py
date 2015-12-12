@@ -47,6 +47,15 @@ class OxHttpAPI(object):
     def logger(self): return self._logger
 
     @property
+    def server(self): return self._server
+
+    @property
+    def user(self): return self._user
+
+    @property
+    def password(self): return self._password
+
+    @property
     def authenticated(self): return self._session is not None
 
     @property
@@ -130,8 +139,10 @@ class OxHttpAPI(object):
         self.logger.debug("Request type: PUT")
         body = data
         if data:
-            if isinstance(data, dict):
-                body = json.dumps(data,ensure_ascii=False,encoding='utf-8')
+            # if isinstance(data, dict):
+            #     body = json.dumps(data,ensure_ascii=False,encoding='utf-8')
+            #body = json.dumps(data,ensure_ascii=False,encoding='utf-8')
+            body = json.dumps(data)
         return self._request(requests.put, module, action, params, data=body)
 
     def login(self, user=None, password=None):
