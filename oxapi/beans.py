@@ -61,6 +61,17 @@ class OxBean(object):
                                                                    self.id)
         return url
 
+    def tag_names(self, encoding=None):
+        names = []
+        if self.categories:
+            for tag in self.categories.split(','):
+                name = tag
+                if encoding is 'ascii':
+                    if isinstance(tag, unicode):
+                        name = tag.encode('utf-8')
+                names.append(name)
+        return names
+
     def data(self, data):
         self._data.update(data)
 

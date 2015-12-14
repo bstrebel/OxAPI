@@ -50,6 +50,7 @@ class OxAttachment(OxBean):
             body = []
             body.append(self.id)
             result = self._ox.put(self.module_name,'detach', params, body)
+            # {u'timestamp': 1449912233915L, u'data': u''}
             pass
 
 class OxAttachments(OxBeans):

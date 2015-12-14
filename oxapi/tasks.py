@@ -7,14 +7,14 @@ from oxapi import *
 class OxTask(OxBean):
 
     @staticmethod
-    def status(key):
+    def get_status(tag):
         task_status = ['unknown', 'not started', 'in progress', 'done', 'waiting', 'deferred']
-        if isinstance(key, int):
-            if key < len(task_status):
-                return task_status[key]
+        if isinstance(tag, int):
+            if tag < len(task_status):
+                return task_status[tag]
         else:
-            if key in task_status:
-                return task_status.index(key)
+            if tag in task_status:
+                return task_status.index(tag)
         return None
 
     module_name = 'tasks'

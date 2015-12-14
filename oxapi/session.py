@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, time, requests, json, re, logging
+from pyutils import LogAdapter
 
 class OxHttpAPI(object):
 
@@ -14,7 +15,7 @@ class OxHttpAPI(object):
             if not server: server = os.environ.get('OX_SERVER')
             if not user: user = os.environ.get('OX_USER')
             if not password: password = os.environ.get('OX_PASSWORD')
-            if not logger: logger = logging.getLogger('oxapi')
+            # if not logger: logger = logging.getLogger('oxapi')
             if server:
                 OxHttpAPI._session = OxHttpAPI(server, logger=logger)
                 if user:
@@ -25,6 +26,12 @@ class OxHttpAPI(object):
     def set_session(ox):
         OxHttpAPI._session = ox
 
+    @staticmethod
+    def hide_password(msg):
+        if msg:
+            msg = re.sub('password=.*&', 'password=*****&', msg, re.IGNORECASE)
+        return msg
+
     def __init__(self, server, user=None, password=None, logger=None):
 
         self._server = server
@@ -34,7 +41,13 @@ class OxHttpAPI(object):
         self._cookies = None
         self._offline = None
         self._utc_offset = None
-        self._logger = logger
+
+        if logger is None: self._logger = logging.getLogger('oxapi')
+        else: self._logger = logger
+        self._adapter = LogAdapter(self._logger, {'package': 'oxapi', 'callback': OxHttpAPI.hide_password})
+
+    @property
+    def logger(self):return self._adapter
 
     def __enter__(self):
         return self
@@ -44,7 +57,7 @@ class OxHttpAPI(object):
             self.logout()
 
     @property
-    def logger(self): return self._logger
+    def logger(self):return self._adapter
 
     @property
     def server(self): return self._server
@@ -70,7 +83,7 @@ class OxHttpAPI(object):
             result = self.get('config/currentTime')
             local = result['data']/1000
             utc = long(time.time())
-            self._utc_offset = long(round((utc-local),-1) * 1000)
+            self._utc_offset = long(round((utc - local),-2) * 1000)
             self.logger.info('UTC offset set to %d milliseconds' % (self._utc_offset))
         return self._utc_offset
 
@@ -84,17 +97,17 @@ class OxHttpAPI(object):
             if response.status_code == 200:
                 if self._cookies is None: self._cookies = response.cookies;
                 if response.content:
+                    self.logger.debug("Response content: [%s]" % (response.content.decode('utf-8')))
                     if response.content.startswith('{'):
                         content = response.json(encoding='UTF-8')
                         if content.get('error'):
-                            print(json.dumps(content, indent=4, ensure_ascii=False, encoding='utf-8'))
+                            # print(json.dumps(content, indent=4, ensure_ascii=False, encoding='utf-8'))
+                            self.logger.error(json.dumps(content, ensure_ascii=False, encoding='utf-8'))
                         return content
-                    else:
-                        return response.content
-                else:
-                    return response
+                return response.content
             else:
-                print(response.status_code)
+                self.logger.error("Response: %d" % (response.status_code))
+                #print(response.status_code)
         return None
 
     def _url(self, module, action):
@@ -112,13 +125,17 @@ class OxHttpAPI(object):
 
     def _params(self, params=None):
         if params is None: params = {}
+        password = params.get('password')
         params['session'] = self._session
+        if password: params['password'] = '*****'
         self.logger.debug("Request params: %s" % (params))
+        if password: params['password'] = password
         return params
 
     def _request(self, call, module, action, params, data=None):
         try:
             self._offline = True
+            self.logger.debug('Request call: [%s] with body %s' % (call.func_name, data))
             response = call(self._url(module, action), cookies=self._cookies, params=self._params(params), data=data)
             self.logger.debug('Request url: %s' % (response.request.path_url))
         except requests.exceptions.RequestException as e:
@@ -128,15 +145,12 @@ class OxHttpAPI(object):
         return self._response(response)
 
     def get(self, module, action=None, params=None):
-        self.logger.debug("Request type: GET")
         return self._request(requests.get, module, action, params)
 
     def post(self, module, action, params):
-        self.logger.debug("Request type: POST")
         return self._request(requests.post, module, action, params)
 
     def put(self, module, action, params, data=None):
-        self.logger.debug("Request type: PUT")
         body = data
         if data:
             # if isinstance(data, dict):
@@ -154,7 +168,7 @@ class OxHttpAPI(object):
                   "password": self._password}
 
         content = self.post('login', 'login', params)
-        if 'session' in content:
+        if content and 'session' in content:
             self.logger.info("User %s successfully logged in at %s!" % (user, self._server))
             self._session = content['session']
         else:
