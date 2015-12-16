@@ -36,5 +36,14 @@ def list_tasks(ox):
 
 if __name__ == '__main__':
 
-    with OxHttpAPI.get_session() as ox:
-        list_tasks(ox)
+    from secrets import server, user, password
+
+    with OxHttpAPI.get_session(server, user, password) as ox:
+        #list_tasks(ox)
+        task = get_a_task(ox)
+        task.upload([{'content': "Text", 'mimetype': 'text/plain', 'name': 'attachment.txt'}])
+
+        ox.logout()
+
+
+

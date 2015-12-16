@@ -34,6 +34,8 @@ class OxHttpAPI(object):
 
     def __init__(self, server, user=None, password=None, logger=None):
 
+        from pyutils import LogAdapter, ConsoleLogger
+
         self._server = server
         self._user = user
         self._password = password
@@ -42,19 +44,23 @@ class OxHttpAPI(object):
         self._offline = None
         self._utc_offset = None
 
-        if logger is None: self._logger = logging.getLogger('oxapi')
-        else: self._logger = logger
-        self._adapter = LogAdapter(self._logger, {'package': 'oxapi', 'callback': OxHttpAPI.hide_password})
+        if logger is None:
+            self._logger = ConsoleLogger('oxapi')
+        else:
+            self._logger = logger
 
-    @property
-    def logger(self):return self._adapter
+        self._adapter = LogAdapter(self._logger, {'package': 'oxapi', 'callback': OxHttpAPI.hide_password})
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.authenticated:
-            self.logout()
+        if self:
+            if self.authenticated:
+                self.logout()
+
+    @property
+    def logger(self):return self._adapter
 
     @property
     def logger(self):return self._adapter

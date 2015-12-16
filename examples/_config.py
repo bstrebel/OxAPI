@@ -23,6 +23,12 @@ def standard_task_folder(ox):
 
 if __name__ == '__main__':
 
+    from secrets import server, user, password
+
+    ox = OxHttpAPI.get_session(server, user, password)
+    ox.logger.debug('Session ID: %s' % (ox._session))
+    exit(0)
+
     with OxHttpAPI.get_session() as ox:
         result = ox.get('config/currentTime')
 
