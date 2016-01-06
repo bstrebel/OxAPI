@@ -34,7 +34,7 @@ class OxHttpAPI(object):
 
     def __init__(self, server, user=None, password=None, logger=None):
 
-        from pyutils import LogAdapter, ConsoleLogger
+        from pyutils import LogAdapter, get_logger
 
         self._server = server
         self._user = user
@@ -45,7 +45,7 @@ class OxHttpAPI(object):
         self._utc_offset = None
 
         if logger is None:
-            self._logger = ConsoleLogger('oxapi')
+            self._logger = get_logger('oxapi', logging.INFO)
         else:
             self._logger = logger
 
