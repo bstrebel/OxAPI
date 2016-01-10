@@ -8,13 +8,26 @@ class OxTask(OxBean):
 
     @staticmethod
     def get_status(tag):
-        task_status = ['unknown', 'not started', 'in progress', 'done', 'waiting', 'deferred']
+        task_status = ['unknown', 'Not started', 'In progress', 'Done', 'Waiting', 'Deferred']
         if isinstance(tag, int):
             if tag < len(task_status):
                 return task_status[tag]
         else:
-            if tag in task_status:
-                return task_status.index(tag)
+            status_lower = [item.lower() for item in task_status]
+            if tag.lower() in status_lower:
+                return status_lower.index(tag.lower())
+        return None
+
+    @staticmethod
+    def get_priority(tag):
+        task_priority = ['unknown', 'Low', 'Medium', 'High']
+        if isinstance(tag, int):
+            if tag < len(task_priority):
+                return task_priority[tag]
+        else:
+            priority_lower = [item.lower() for item in task_priority]
+            if tag.lower() in priority_lower:
+                return priority_lower.index(tag.lower())
         return None
 
     module_name = 'tasks'
@@ -36,7 +49,20 @@ class OxTask(OxBean):
            'alarm': 204,
 
            'status': 300,
-           'type': 302}
+           'percent_completed': 301,
+           'actual_costs': 302,
+           'actual_duration': 303,
+           'billing_information': 305,
+           'target_costs': 307,
+           'target_duration': 308,
+           'priority': 309,
+           'currency': 312,
+           'trip_meter': 313,
+           'companies': 314,
+           'date_completed': 315}
+           #'start_time': 316,
+           #'end_time': 317,
+           #'full_time': 401}
 
     map.update(OxBean.map)
     columns = OxBean.columns(map)

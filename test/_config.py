@@ -23,18 +23,19 @@ def standard_task_folder(ox):
 
 if __name__ == '__main__':
 
-    from secrets import server, user, password
+    #from secrets import server, user, password
 
-    ox = OxHttpAPI.get_session(server, user, password)
-    ox.logger.debug('Session ID: %s' % (ox._session))
-    exit(0)
+    #ox = OxHttpAPI.get_session()
+    #ox.logger.debug('Session ID: %s' % (ox._session))
+    #exit(0)
 
     with OxHttpAPI.get_session() as ox:
         result = ox.get('config/currentTime')
+        server = ox.config('serverVersion')
 
     local = result['data']/1000
     utc = long(time.time())
 
-    offset = long(round((utc-local),-1))
+    offset = long(round((utc-local),-2))
     print(offset/60/60)
 

@@ -51,6 +51,24 @@ class OxBean(object):
     @property
     def timestamp(self): return self._timestamp
 
+    @property # evernote compatible representation of categories
+    def tagNames(self): return self.tagNames('ascii')
+
+    @property
+    def categories(self): return self._data.get('categories','')
+
+    @categories.setter
+    def categories(self, value):
+        if isinstance(value, str):
+            self._data['categories'] = value
+        elif isinstance(value, list):
+            self._data['categories'] = ','.join(value)
+        else:
+            # value error
+            self._data['categories'] = None
+
+        #    return ','.join(map(lambda guid: self.book.get_tag(guid).decode('utf-8'), self.tagGuids))
+
     def get_url(self):
         # https://ox.digitec.de/appsuite/#!&app=io.ox/tasks&folder=1963&id=1963.43941
 
@@ -139,11 +157,12 @@ class OxBean(object):
                 return self
         return None
 
-    def update(self, ox=None):
+    def update(self, ox=None, folder=None):
         if not ox: ox=self._ox
+        if not folder: folder = self.folder_id
         if ox and self._data:
             params = {'id': self.id,
-                      'folder': self.folder_id,
+                      'folder': folder,
                       'timestamp': self._timestamp}
             content = ox.put(self._module_name, 'update', params, self._data)
             if content:

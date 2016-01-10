@@ -36,14 +36,18 @@ def list_tasks(ox):
 
 if __name__ == '__main__':
 
-    from secrets import server, user, password
+    #from secrets import server, user, password
 
-    with OxHttpAPI.get_session(server, user, password) as ox:
+    with OxHttpAPI.get_session() as ox:
         #list_tasks(ox)
         task = get_a_task(ox)
-        task.upload([{'content': "Text", 'mimetype': 'text/plain', 'name': 'attachment.txt'}])
+        #task.upload([{'content': "Text", 'mimetype': 'text/plain', 'name': 'attachment.txt'}])
+        task.load()
+        folder = task.folder_id
+        task._data['folder_id'] = '1958'
+        result = task.update(folder=folder)
+        pass
 
-        ox.logout()
 
 
 
