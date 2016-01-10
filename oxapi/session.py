@@ -45,7 +45,7 @@ class OxHttpAPI(object):
         self._utc_offset = None
 
         if logger is None:
-            self._logger = get_logger('oxapi', logging.INFO)
+            self._logger = get_logger('oxapi', logging.DEBUG)
         else:
             self._logger = logger
 
@@ -92,6 +92,11 @@ class OxHttpAPI(object):
             self._utc_offset = long(round((utc - local),-2) * 1000)
             self.logger.info('UTC offset set to %d milliseconds' % (self._utc_offset))
         return self._utc_offset
+
+    @property
+    def serverVersion(self):
+        return self.config('serverVersion')
+
 
     def _response(self, response):
         """
@@ -175,16 +180,20 @@ class OxHttpAPI(object):
 
         content = self.post('login', 'login', params)
         if content and 'session' in content:
-            self.logger.info("User %s successfully logged in at %s!" % (user, self._server))
+            self.logger.info("User %s successfully logged in at %s" % (user, self._server))
             self._session = content['session']
         else:
-            self.logger.error("Login for %s at %s failed!" % (user, self._server))
+            self.logger.error("Login for %s at %s failed" % (user, self._server))
 
     def logout(self):
         self.get('login', 'logout', {})
         self._session = None
         self._cookies = None
         self.logger.info("User %s logged out!" % (self._user))
+
+    def config(self, path):
+        result = self.get('config' + '/' + path)
+        return result.get('data')
 
     def _get_beans(self, beans, action, params={}):
         """
