@@ -290,7 +290,11 @@ class OxHttpAPI(object):
         from oxapi import OxTasks, OxTask
         task = self._get_beans(OxTasks, 'get', {'id': id, 'folder': folder})
         return task.delete()
-        #return self._get_beans(OxTasks, 'delete', {'id': id, 'folder': folder})
+
+    def move_task(self, folder, id, target):
+        from oxapi import OxTasks, OxTask
+        task = self._get_beans(OxTasks, 'get', {'id': id, 'folder': folder})
+        return task.update(target)
 
     """ Attachment module wrapper """
 
