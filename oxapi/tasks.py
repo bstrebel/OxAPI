@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os,sys,time,json,requests
+import os,sys,time,json,requests,re
 from oxapi import *
 
 class OxTask(OxBean):
@@ -20,7 +20,8 @@ class OxTask(OxBean):
 
     @staticmethod
     def get_priority(tag):
-        task_priority = ['unknown', 'Low', 'Medium', 'High']
+        # BUG: HTTP API returns number-like strings for priority
+        task_priority = ['None', 'Low', 'Medium', 'High']
         if isinstance(tag, int):
             if tag < len(task_priority):
                 return task_priority[tag]
