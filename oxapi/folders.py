@@ -6,7 +6,7 @@ from oxapi import *
 
 class OxFolder(OxBean):
 
-    module_name = 'tasks'
+    module_name = 'folders'
     module_type = None
 
     map = {'modified_by': 3,
