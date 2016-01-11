@@ -60,12 +60,19 @@ class OxTask(OxBean):
            'trip_meter': 313,
            'companies': 314,
            'date_completed': 315}
-           #'start_time': 316,
-           #'end_time': 317,
-           #'full_time': 401}
+
+    # new columns available only since Rev. 7.6.1
+    # but: works not for default folder 'Tasks'
+
+    map761 = {'start_time': 316,
+              'end_time': 317,
+              'full_time': 401}
 
     map.update(OxBean.map)
+    reverse = OxBean.map_reverse(map)
+
     columns = OxBean.columns(map)
+    #fields = OxBean.fields(map)
 
     def __init__(self, data, ox=None, timestamp=None):
         self._module_name = OxTask.module_name
