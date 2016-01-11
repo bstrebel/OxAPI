@@ -10,6 +10,11 @@ class OxBean(object):
            'created_by': 2,
            'creation_date': 4}
 
+    reverse = {}
+    # reverse = {1: 'id',
+    #            2: 'created_by',
+    #            3: 'creation_date'}
+
     @classmethod
     def attr(cls, key):
         if isinstance(key, str):
@@ -24,6 +29,13 @@ class OxBean(object):
         for key in sorted(map, key=map.__getitem__):
             columns.append(map[key])
         return columns
+
+    @classmethod
+    def map_reverse(cls, map):
+        reverse = {}
+        for key in sorted(map, key=map.__getitem__):
+            reverse[map[key]] = key
+        return reverse
 
     @classmethod
     def index(cls, key):
@@ -90,8 +102,43 @@ class OxBean(object):
                 names.append(name)
         return names
 
-    def data(self, data):
-        self._data.update(data)
+    def expand(self, content_data=None):
+
+        if not content_data:
+
+            if not self._data:
+                return None
+            else:
+                content_data = self._data
+                replace = True
+
+        if isinstance(content_data, list):
+            data = {}
+            max = len(content_data) - 1
+            for index in range(0, max):
+                value = content_data[index]
+                key = self.reverse[self.columns[index]]
+                data[key] = value
+
+            if replace:
+                self._data = data
+
+            return data
+        else:
+            return content_data
+
+        return None
+
+    def _check_bean(self, ox=None):
+        if not ox: ox=self._ox
+        result = True
+        if self._timestamp is None:
+            ox.logger.error('Bean request will fail without timestamp!')
+            result = False
+        if not isinstance(self._data, dict):
+            ox.logger.error('Bean request will fail without data')
+            result = False
+        return result
 
     def __getitem__(self, key):
         if isinstance(self._data, dict):
@@ -123,6 +170,7 @@ class OxBean(object):
 
     def delete(self, ox=None):
         if not ox: ox=self._ox
+        if not self._check_bean(ox): return None
         result = None
         if ox and self._data:
             data = {'id': self.id,
@@ -130,7 +178,6 @@ class OxBean(object):
             params = {'timestamp': self._timestamp}
             result = ox.put(self._module_name, 'delete', params, data)
         return result
-
 
     def get(self, ox=None):
         if not ox: ox=self._ox
@@ -157,17 +204,32 @@ class OxBean(object):
                 return self
         return None
 
-    def update(self, ox=None, folder=None):
+    def update(self, ox=None, new_folder=None):
         if not ox: ox=self._ox
-        if not folder: folder = self.folder_id
+        if not self._check_bean(ox): return None
+        current_folder = self.folder_id
         if ox and self._data:
+            if new_folder:
+                self._data['folder_id'] = new_folder
+
             params = {'id': self.id,
-                      'folder': folder,
+                      'folder': current_folder,
                       'timestamp': self._timestamp}
             content = ox.put(self._module_name, 'update', params, self._data)
             if content:
                 self._timestamp = content.get('timestamp', None)
         return self
+
+    def move(self, target, ox=None):
+        if not ox: ox=self._ox
+        if target is not None:
+            target_folder = ox.get_folder(self.module_name, target)
+            if target_folder:
+                return self.update(ox=ox, new_folder=target_folder.id)
+        else:
+            # TODO: argument exception
+            pass
+        return None
 
     def upload(self, args=[{'content':None,'file':None, 'mimetype':'text/plain','name':'attachment.txt'}]):
 
