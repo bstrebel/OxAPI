@@ -265,6 +265,10 @@ class OxHttpAPI(object):
 
     def get_folder(self, type, guess=None):
 
+        from oxapi import OxFolder
+        if isinstance(guess, OxFolder):
+            return guess
+
         if guess is None:
             return self.get_standard_folder(type)
 
