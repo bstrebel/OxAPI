@@ -64,22 +64,10 @@ class OxBean(object):
     def timestamp(self): return self._timestamp
 
     @property # evernote compatible representation of categories
-    def tagNames(self): return self.tagNames('ascii')
+    def tagNames(self): return self.tag_names('ascii')
 
     @property
     def categories(self): return self._data.get('categories','')
-
-    @categories.setter
-    def categories(self, value):
-        if isinstance(value, str):
-            self._data['categories'] = value
-        elif isinstance(value, list):
-            self._data['categories'] = ','.join(value)
-        else:
-            # value error
-            self._data['categories'] = None
-
-        #    return ','.join(map(lambda guid: self.book.get_tag(guid).decode('utf-8'), self.tagGuids))
 
     def get_url(self):
         # https://ox.digitec.de/appsuite/#!&app=io.ox/tasks&folder=1963&id=1963.43941
@@ -146,27 +134,29 @@ class OxBean(object):
         else:
             return self._data[self.index(key)]
 
-    # def __setitem__(self, key, value):
-    #     if isinstance(self._data, dict):
-    #         self._data[key] = value
-    #     else:
-    #         self._data[self.index(key)] = value
-
     def __getattr__(self, key):
         if isinstance(self._data, dict):
             return self._data.get(key)
         else:
             return self._data[self.index(key)]
 
-    # def __setattr__(self, key, value):
-    #     if key in self.map:
-    #         if isinstance(self._data, dict):
-    #             self._data[key] = value
-    #         else:
-    #             self._data[self.index(key)] = value
-    #     else:
-    #         self.__dict__[key] = value
-    #         super(OxBean, self).__setattr__(key, value)
+    def __setitem__(self, key, value):
+
+        # replaces @categories.setter
+        if key == 'categories':
+            if isinstance(value, list):
+                value = ','.join(value)
+
+        if isinstance(self._data, dict):
+            self._data[key] = value
+        else:
+            self._data[self.index(key)] = value
+
+    def __setattr__(self, key, value):
+        if key in self.map:
+            self.__setitem__(key, value)
+        else:
+            self.__dict__[key] = value
 
     def delete(self, ox=None):
         if not ox: ox=self._ox
