@@ -13,9 +13,10 @@ class OxTask(OxBean):
             if tag < len(task_status):
                 return task_status[tag]
         else:
-            status_lower = [item.lower() for item in task_status]
-            if tag.lower() in status_lower:
-                return status_lower.index(tag.lower())
+            if tag:
+                status_lower = [item.lower() for item in task_status]
+                if tag.lower() in status_lower:
+                    return status_lower.index(tag.lower())
         return None
 
     @staticmethod
@@ -26,9 +27,10 @@ class OxTask(OxBean):
             if tag < len(task_priority):
                 return task_priority[tag]
         else:
-            priority_lower = [item.lower() for item in task_priority]
-            if tag.lower() in priority_lower:
-                return priority_lower.index(tag.lower())
+            if tag:
+                priority_lower = [item.lower() for item in task_priority]
+                if tag.lower() in priority_lower:
+                    return priority_lower.index(tag.lower())
         return None
 
     module_name = 'tasks'
