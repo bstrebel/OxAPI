@@ -33,11 +33,12 @@ class OxFolder(OxBean):
            'account_id': 318}
 
     map.update(OxBean.map)
+    reverse = OxBean.map_reverse(map)
     columns = OxBean.columns(map)
 
-    def __init__(self, data, ox=None, timestamp=None):
+    def __init__(self, data, ox=None, timestamp=None, columns=None):
         self._path = None
-        OxBean.__init__(self, data, ox, timestamp)
+        OxBean.__init__(self, data, ox, timestamp, columns)
 
 class OxFolders(OxBeans):
 
@@ -50,28 +51,30 @@ class OxFolders(OxBeans):
 
         if action == 'root':
 
-            params.update({'columns': ",".join(map(lambda id: str(id), OxFolder.columns))})
+            params = OxFolder.check_columns(params)
             self._data = []
             OxBeans.action(self, OxFolder, action, params)
-            for raw in self._raw: self._data.append(OxFolder(raw, self._ox))
+            for raw in self._raw:
+                self._data.append(OxFolder(raw, self._ox, columns=self._columns))
             return self
 
         elif action == 'allVisible':
 
-            params.update({'columns': ",".join(map(lambda id: str(id), OxFolder.columns))})
+            params = OxFolder.check_columns(params)
             self._data = []
             OxBeans.action(self, OxFolder, action, params)
             for key in self._raw:
                 for raw in self._raw[key]:
-                    self._data.append(OxFolder(raw,self._ox))
+                    self._data.append(OxFolder(data=raw, ox=self._ox, columns=self._columns))
             return self
 
         elif action == 'path':
 
-            params.update({'columns': ",".join(map(lambda id: str(id), OxFolder.columns))})
+            params = OxFolder.check_columns(params)
             self._data = []
             OxBeans.action(self, OxFolder, action, params)
-            for raw in self._raw: self._data.append(OxFolder(raw,self._ox))
+            for raw in self._raw:
+                self._data.append(OxFolder(raw, self._ox, columns=self._columns))
             return self
 
         elif action == 'get':

@@ -16,6 +16,29 @@ class OxBean(object):
     #            3: 'creation_date'}
 
     @classmethod
+    def check_columns(cls, params):
+
+        columns = cls.columns
+
+        if params.get('columns') is not None:
+
+            columns = []
+            ref = params['columns']
+            if not isinstance(ref, list):
+                ref = list(ref.split(','))
+            for column in ref:
+                if isinstance(column, int):
+                    columns.append(column)
+                else:
+                    if re.match('^\d+$', column):
+                        columns.append(int(column))
+                    else:
+                        columns.append(cls.map.get(column))
+
+        params.update({'columns': ",".join(map(lambda id: str(id), sorted(set(columns))))})
+        return params
+
+    @classmethod
     def attr(cls, key):
         if isinstance(key, str):
             return cls.map[key]
@@ -45,11 +68,12 @@ class OxBean(object):
         else:
             return cls.columns.index(key)
 
-    def __init__(self, data, ox=None, timestamp=None):
+    def __init__(self, data, ox=None, timestamp=None, columns=None):
         if ox: self._ox = ox
         else:  self._ox = OxHttpAPI.get_session()
         self._timestamp = timestamp
         self._data = data
+        self._columns = columns
 
     @property
     def ox(self): return self._ox
@@ -127,6 +151,16 @@ class OxBean(object):
             ox.logger.error('Bean request will fail without data')
             result = False
         return result
+
+    def index(self, key):
+
+        if isinstance(key, str):
+            key = self.map[key]
+
+        if self._columns is None:
+            return self.columns.index(key)
+        else:
+            return self._columns.index(key)
 
     def __getitem__(self, key):
         if isinstance(self._data, dict):
@@ -311,6 +345,7 @@ class OxBeans(object):
         self._content = None
         self._raw = None
         self._data = None
+        self._columns = None
 
     def action(self, type, action, params):
         content = self._ox.get(self.module_name, action, params)
@@ -321,6 +356,11 @@ class OxBeans(object):
                 else:
                     self._timestamp = content.get('timestamp', None)
                     self._raw = content.get('data', None)
+
+                    if params.get('columns'):
+                        self._columns = map(lambda id: int(id), params['columns'].split(','))
+                    else:
+                        self._columns = None
             else:
                 self._content = content
         return self

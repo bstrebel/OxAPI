@@ -35,21 +35,22 @@ def list_tasks(ox):
             # if attachment.file_mimetype == 'text/plain':
             #     document = attachment.document
 
-if __name__ == '__main__':
-
-    #from secrets import server, user, password
+def test_ox_beans(ox):
 
     MyFolder='1958'
     Tasks='246'
     Updated='44308'
+    OxSync='1963'
+    Task='44298'
 
     with OxHttpAPI.get_session() as ox:
+
         #list_tasks(ox)
-        task = ox.get_task(Tasks,Updated)
+        task = ox.get_task(OxSync,Task)
         #data = task.data
         #task.upload([{'content': "Text", 'mimetype': 'text/plain', 'name': 'attachment.txt'}])
 
-        task.load()
+        #task.load()
         #task.expand()
 
         #folder = task.folder_id
@@ -59,7 +60,56 @@ if __name__ == '__main__':
         #folder_id = task.folder_id
         #task._data = {'id': id, 'folder_id': folder_id}
         #result = task.move('1958')
+
+        # task._data['status'] = OxTask.get_status('In progress')
+        # task._data['priority'] = OxTask.get_priority('High')
+        # task._data['private_flag'] = False
+
+        #task._data['status'] = -1
+
+        tags = task.tagNames
+
+
+        cat = task.categories
+        task.categories = ['A', 'B']
+
+        cat = task['categories']
+        task['categories'] = ['a', 'b']
+
+        cat = task._data['categories']
+        task._data['categories'] = ','.join(['A', 'B'])
+
+
+
+
+        task._data['priority'] = 'null'
+        task.private_flag = False
+        task['private_flag'] = True
+
+        task.update()
+        task.load()
+
         pass
+
+def check_folder_columns(ox, folder):
+
+    assert type(ox) is OxHttpAPI, 'OxHttpAPI session required!'
+
+    folder = ox.get_folder('tasks', folder)
+    print folder.title
+    tasks = ox.get_tasks(folder.id, ['id', 'title', 'start_date', 'end_date'])
+    for task in tasks:
+        print task.title
+
+
+if __name__ == '__main__':
+
+    with OxHttpAPI.get_session() as ox:
+
+        check_folder_columns(ox, 'MyTasks')
+        #check_folder_columns(ox, 'Tasks')
+
+
 
 
 

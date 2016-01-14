@@ -215,14 +215,14 @@ class OxHttpAPI(object):
         from oxapi import OxFolders
         return self._get_beans(OxFolders, 'root')
 
-    def get_folders(self, type):
+    def get_folders(self, type, columns=None):
         """
         Get folders of spec. module type
         :param type: folder type, e.g. 'tasks'
         :return: list of OxFolder
         """
         from oxapi import OxFolders
-        return self._get_beans(OxFolders, 'allVisible', {'content_type': type})
+        return self._get_beans(OxFolders, 'allVisible', {'content_type': type, 'columns': columns})
 
     def get_folder_path(self, id):
         """
@@ -249,7 +249,7 @@ class OxHttpAPI(object):
         :param type: folder type, e.g. 'tasks'
         :return: OxFolder
         """
-        for folder in self.get_folders(type):
+        for folder in self.get_folders(type, ['id', 'title']):
             if folder.title == title:
                 return self.get_folder_by_id(folder.id)
 
@@ -282,9 +282,9 @@ class OxHttpAPI(object):
 
     """ Public task module wrapper """
 
-    def get_tasks(self, folder):
+    def get_tasks(self, folder, columns=None):
         from oxapi import OxTasks
-        return self._get_beans(OxTasks, 'all', {'folder': folder})
+        return self._get_beans(OxTasks, 'all', {'folder': folder, 'columns': columns})
 
     def get_task(self, folder, id):
         from oxapi import OxTasks

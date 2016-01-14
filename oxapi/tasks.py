@@ -62,7 +62,10 @@ class OxTask(OxBean):
            'currency': 312,
            'trip_meter': 313,
            'companies': 314,
-           'date_completed': 315}
+           'date_completed': 315,
+           'start_time': 316,
+           'end_time': 317,
+           'full_time': 401}
 
     # new columns available only since Rev. 7.6.1
     # but: works not for default folder 'Tasks'
@@ -77,12 +80,12 @@ class OxTask(OxBean):
     columns = OxBean.columns(map)
     #fields = OxBean.fields(map)
 
-    def __init__(self, data, ox=None, timestamp=None):
+    def __init__(self, data, ox=None, timestamp=None, columns=None):
         self._module_name = OxTask.module_name
         self._module_type = OxTask.module_type
         self._attachments = None
         self._path = None
-        OxBean.__init__(self, data, ox, timestamp)
+        OxBean.__init__(self, data, ox, timestamp, columns)
 
 
 class OxTasks(OxBeans):
@@ -96,10 +99,11 @@ class OxTasks(OxBeans):
 
         if action == 'all':
 
-            params.update({'columns': ",".join(map(lambda id: str(id), OxTask.columns))})
+            params = OxTask.check_columns(params)
             self._data = []
             OxBeans.action(self, OxTask, action, params)
-            for raw in self._raw: self._data.append(OxTask(raw, self._ox))
+            for raw in self._raw:
+                self._data.append(OxTask(raw, self._ox, columns=self._columns))
             return self
 
         elif action == 'get':
