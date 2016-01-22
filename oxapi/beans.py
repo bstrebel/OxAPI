@@ -87,6 +87,12 @@ class OxBean(object):
     @property
     def timestamp(self): return self._timestamp
 
+    @property
+    def time(self):
+        if self.last_modified_utc is not None:
+            return self.last_modified_utc
+        return self.last_modified + self._ox.utc_offset
+
     @property # evernote compatible representation of categories
     def tagNames(self): return self.tag_names('ascii')
 
