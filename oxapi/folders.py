@@ -40,6 +40,11 @@ class OxFolder(OxBean):
         self._path = None
         OxBean.__init__(self, data, ox, timestamp, columns)
 
+    def items(self, columns=None):
+        ox = self._ox
+        module = ox.module_class(self.module)
+        return ox._get_beans(module, 'all', {'folder': self.id, 'columns': columns})
+
 class OxFolders(OxBeans):
 
     module_name = 'folders'

@@ -21,10 +21,10 @@ class OxAttachment(OxBean):
     map.update(OxBean.map)
     columns = OxBean.columns(map)
 
-    def __init__(self, data, ox=None, timestamp=None):
+    def __init__(self, data, ox=None, timestamp=None, columns=None):
         self._document = None
         self._module = 'attachment'
-        OxBean.__init__(self, data, ox, timestamp)
+        OxBean.__init__(self, data, ox, timestamp, columns)
 
     @property
     def document(self):

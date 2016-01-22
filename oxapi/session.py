@@ -63,9 +63,6 @@ class OxHttpAPI(object):
     def logger(self):return self._adapter
 
     @property
-    def logger(self):return self._adapter
-
-    @property
     def server(self): return self._server
 
     @property
@@ -97,6 +94,11 @@ class OxHttpAPI(object):
     def serverVersion(self):
         return self.config('serverVersion')
 
+    def module_class(self, module):
+
+        from oxapi import OxTasks, OxAttachments
+        return {'tasks': OxTasks,
+                'attachment': OxAttachments}.get(module)
 
     def _response(self, response):
         """
@@ -240,7 +242,9 @@ class OxHttpAPI(object):
         :return: OxFolder
         """
         from oxapi import OxFolders
-        return self._get_beans(OxFolders, 'get', {'id': id})
+        folder = self._get_beans(OxFolders, 'get', {'id': id})
+        # folder._module = folder._module
+        return folder
 
     def get_folder_by_name(self, title, type):
         """
@@ -259,7 +263,7 @@ class OxHttpAPI(object):
         :param type:
         :return:
         """
-        for folder in self.get_folders(type):
+        for folder in self.get_folders(type, ['id', 'title', 'standard_folder']):
             if folder.standard_folder:
                 return self.get_folder_by_id(folder.id)
 

@@ -95,10 +95,20 @@ def check_folder_columns(ox, folder):
 
     assert type(ox) is OxHttpAPI, 'OxHttpAPI session required!'
 
-    folder = ox.get_folder('tasks', folder)
-    print folder.title
-    tasks = ox.get_tasks(folder.id, ['id', 'title', 'start_date', 'end_date'])
-    for task in tasks:
+    # folder = ox.get_folder('tasks', folder)
+    # print folder.title
+
+    # tasks = ox.get_tasks(folder.id, ['id', 'title', 'start_date', 'end_date'])
+    # for task in tasks:
+    #     print task.title
+
+    # for task in folder.items(['id', 'title', 'start_date', 'end_date']):
+    #     print task.title
+
+    # for task in ox.get_folder('tasks', folder).items(['id', 'title', 'start_date', 'end_date']):
+    #     print task.title
+
+    for task in ox.get_folder('tasks', folder).items():
         print task.title
 
 
@@ -106,7 +116,7 @@ if __name__ == '__main__':
 
     with OxHttpAPI.get_session() as ox:
 
-        check_folder_columns(ox, 'MyTasks')
+        check_folder_columns(ox, 'OxSync')
         #check_folder_columns(ox, 'Tasks')
 
 

@@ -62,10 +62,7 @@ class OxTask(OxBean):
            'currency': 312,
            'trip_meter': 313,
            'companies': 314,
-           'date_completed': 315,
-           'start_time': 316,
-           'end_time': 317,
-           'full_time': 401}
+           'date_completed': 315}
 
     # new columns available only since Rev. 7.6.1
     # but: works not for default folder 'Tasks'
