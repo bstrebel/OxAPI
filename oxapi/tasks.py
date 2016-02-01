@@ -62,7 +62,10 @@ class OxTask(OxBean):
            'currency': 312,
            'trip_meter': 313,
            'companies': 314,
-           'date_completed': 315}
+           'date_completed': 315,
+           'start_time': 201,
+           'end_time': 202,
+           'full_time': 401}
 
     # new columns available only since Rev. 7.6.1
     # but: works not for default folder 'Tasks'
@@ -83,6 +86,53 @@ class OxTask(OxBean):
         self._attachments = None
         self._path = None
         OxBean.__init__(self, data, ox, timestamp, columns)
+
+    @property
+    def _id(self): return self['id']
+
+    @property
+    def _time(self): return self['last_modified']
+
+    @property
+    def _key(self): return self['title']
+
+    @property
+    def _alarm_date(self): return self.alarm/1000 if self.alarm else None
+
+    @property
+    def _start_date(self): return self.start_date/1000 if self.start_date else None
+
+    @property
+    def _end_date(self): return self.end_date/1000 if self.end_date else None
+
+    @property
+    def _start_time(self): return self.start_time/1000 if self.start_time else None
+
+    @property
+    def _end_time(self): return self.end_time/1000 if self.end_time else None
+
+    @property
+    def _start_time_utc(self): return self.start_time/1000 + (self._ox.utc_offset) if self.start_time else None
+
+    @property
+    def _end_time_utc(self): return self.end_time/1000 + (self._ox.utc_offset) if self.end_time else None
+
+
+    # @property
+    # def _start_date(self): return self._checked_date('start')
+    #
+    # @property
+    # def _end_date(self): return self._checked_date('end')
+    #
+    # def _checked_date(self, tag):
+    #     key = tag + '_time'
+    #     if self._data.get(key):
+    #         return self._data[key]/1000
+    #     else:
+    #         key = tag + '_date'
+    #         if self._data.get(key):
+    #             return self._data[key]/1000
+    #     return None
 
 
 class OxTasks(OxBeans):

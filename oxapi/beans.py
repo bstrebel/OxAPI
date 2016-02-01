@@ -93,7 +93,7 @@ class OxBean(object):
             return self.last_modified_utc
         return self.last_modified + self._ox.utc_offset
 
-    @property # evernote compatible representation of categories
+    @property   # evernote compatible representation of categories
     def tagNames(self): return self.tag_names('ascii')
 
     @property
@@ -110,6 +110,11 @@ class OxBean(object):
         return url
 
     def tag_names(self, encoding=None):
+        '''
+        categories spliited into a list of names
+        :param encoding: use ascii for Evernote compatible encoding
+        :return: list of encoded tag names
+        '''
         names = []
         if self.categories:
             for tag in self.categories.split(','):
