@@ -9,6 +9,7 @@ def list_task_folders(ox):
     #     print("{} [{}]".format(folder.title, folder.type))
 
     for folder in ox.get_folders('tasks'):
+        folder.expand()
         print("{} [{}]".format(folder.title, folder.type))
 
 def list_root_folders(ox):
