@@ -126,9 +126,14 @@ class OxBean(object):
         return names
 
     def expand(self, content_data=None):
+        '''
+        get attribute hash representation of data list
+        :param content_data: attribute list
+        :return: attribute hash
+        '''
+        replace = False
 
         if not content_data:
-
             if not self._data:
                 return None
             else:
@@ -136,6 +141,10 @@ class OxBean(object):
                 replace = True
 
         if isinstance(content_data, list):
+
+            assert len(content_data) == len(self.columns),\
+                'Number of attributes does not match the number of data columns!'
+
             data = {}
             max = len(content_data) - 1
             for index in range(0, max):
@@ -149,8 +158,6 @@ class OxBean(object):
             return data
         else:
             return content_data
-
-        return None
 
     def _check_bean(self, ox=None):
         if not ox: ox=self._ox
