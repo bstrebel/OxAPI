@@ -268,13 +268,20 @@ class OxHttpAPI(object):
                 return self.get_folder_by_id(folder.id)
 
     def get_folder(self, type, guess=None):
-
+        '''
+        Get OxFolder of sepcified type and (optional) name
+        :param type: folder type (e.g. 'tasks'
+        :param guess: name or id or nothing for standard folder
+        :return:
+        '''
         from oxapi import OxFolder
+
+        if not guess:
+            return self.get_standard_folder(type)
+
         if isinstance(guess, OxFolder):
             return guess
 
-        if guess is None:
-            return self.get_standard_folder(type)
 
         if isinstance(guess, int):
             guess = str(guess)
