@@ -22,8 +22,8 @@ class OxHttpAPI(object):
                     OxHttpAPI._session.login(user, password)
         return OxHttpAPI._session
 
-    @staticmethod
-    def set_session(ox):
+    @classmethod
+    def set_session(cls, ox):
         OxHttpAPI._session = ox
 
     @staticmethod
