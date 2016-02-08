@@ -87,7 +87,7 @@ class OxHttpAPI(object):
             local = result['data']/1000
             utc = long(time.time())
             self._utc_offset = long(round((utc - local),-2) * 1000)
-            self.logger.info('UTC offset set to %d milliseconds' % (self._utc_offset))
+            self.logger.debug('UTC offset set to %d milliseconds' % (self._utc_offset))
         return self._utc_offset
 
     @property
@@ -182,7 +182,7 @@ class OxHttpAPI(object):
 
         content = self.post('login', 'login', params)
         if content and 'session' in content:
-            self.logger.info("User %s successfully logged in at %s" % (user, self._server))
+            self.logger.debug("User %s successfully logged in at %s" % (user, self._server))
             self._session = content['session']
         else:
             self.logger.error("Login for %s at %s failed" % (user, self._server))
@@ -191,7 +191,7 @@ class OxHttpAPI(object):
         self.get('login', 'logout', {})
         self._session = None
         self._cookies = None
-        self.logger.info("User %s logged out!" % (self._user))
+        self.logger.debug("User %s logged out!" % (self._user))
 
     def config(self, path):
         result = self.get('config' + '/' + path)
