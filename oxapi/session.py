@@ -160,8 +160,10 @@ class OxHttpAPI(object):
     def get(self, module, action=None, params=None):
         return self._request(requests.get, module, action, params)
 
-    def post(self, module, action, params):
-        return self._request(requests.post, module, action, params)
+    def post(self, module, action, params, data=None):
+        if data:
+            body = json.dumps(data)
+        return self._request(requests.post, module, action, params, data)
 
     def put(self, module, action, params, data=None):
         body = data
@@ -177,10 +179,10 @@ class OxHttpAPI(object):
         if user: self._user = user
         if password: self._password = password
 
-        params = {"name": self._user,
-                  "password": self._password}
+        params = {"name": self._user}
+        data = {"password": self._password}
 
-        content = self.post('login', 'login', params)
+        content = self.post('login', 'login', params, data)
         if content and 'session' in content:
             self.logger.debug("User %s successfully logged in at %s" % (user, self._server))
             self._session = content['session']
