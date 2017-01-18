@@ -331,6 +331,17 @@ class OxHttpAPI(object):
         from oxapi import OxAttachments
         return self._get_beans(OxAttachments, 'document', {'module': module, 'attached': id,  'folder': folder, 'id': attachment})
 
+    """ Export module wrapper """
+
+    def export(self, folder_id):
+        format = { "calendar": "ICAL", "contacts": "VCARD"}
+        fld = self.get_folder_by_id(folder_id)
+        if fld is None:
+            raise ValueError(u'Invalid folder id [{}]'.format(folder_id))
+        if not format.has_key(fld.type):
+            raise ValueError("Invalid folder type: [{}]".format(fld.type))
+        return self.get("export", format[type], {'folder': fld.id})
+
 # region __main__
 
 if __name__ == '__main__':

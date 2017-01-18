@@ -11,6 +11,8 @@ def list_task_folders(ox):
     for folder in ox.get_folders('tasks'):
         folder.expand()
         print("{} [{}]".format(folder.title, folder.type))
+        print '/'.join(list(reversed(map(lambda path:path.title, ox.get_folder_path(folder.id)))))
+
 
 def list_root_folders(ox):
 
