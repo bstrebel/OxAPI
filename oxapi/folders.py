@@ -8,6 +8,22 @@ class OxFolder(OxBean):
 
     module_name = 'folders'
     module_type = None
+    system_users = 6
+
+    # TODO: complete type dictionary
+    types = {'private': 1,
+             'public': 2,
+             'shared': 3}
+
+    @staticmethod
+    def get_type_from_tag(tag):
+        return OxFolder.types.get(tag)
+
+    @staticmethod
+    def get_type_from_id(id):
+        for k,v in OxFolder.types.iteritems():
+            if v == id: return k
+        return None
 
     map = {'modified_by': 3,
            'last_modified': 5,

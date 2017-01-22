@@ -24,9 +24,15 @@ def standard_task_folder(ox):
     folder = ox.get_standard_folder('tasks')
     print(folder.title)
 
+
 if __name__ == '__main__':
 
     with OxHttpAPI.get_session() as ox:
-        list_root_folders(ox)
-        list_task_folders(ox)
-        standard_task_folder(ox)
+        if ox.authenticated:
+            folder = ox.get_folder_by_id(244)
+        else:
+            print("Login for {} at {} failed!".format(ox.user, ox.server))
+
+        #list_root_folders(ox)
+        #list_task_folders(ox)
+        #standard_task_folder(ox)
