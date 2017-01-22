@@ -29,7 +29,10 @@ class OxHttpAPI(object):
     @staticmethod
     def hide_password(msg):
         if msg:
-            msg = re.sub('password=.*&', 'password=*****&', msg, re.IGNORECASE)
+            # password via get request: deprecated
+            # msg = re.sub('password=.*&', 'password=*****&', msg, re.IGNORECASE)
+            # hide password when logging the post request body
+            msg = re.sub("{'password': .*}", "{'password': '*****'}", msg, re.IGNORECASE)
         return msg
 
     def __init__(self, server, user=None, password=None, logger=None):
@@ -58,12 +61,17 @@ class OxHttpAPI(object):
         if self:
             if self.authenticated:
                 self.logout()
+            # destroy global ox session handle
+            OxHttpAPI.set_session(None)
 
     @property
     def logger(self):return self._adapter
 
     @property
     def server(self): return self._server
+
+    @server.setter
+    def server(self, value): self._server = value
 
     @property
     def user(self): return self._user
@@ -110,14 +118,24 @@ class OxHttpAPI(object):
             if response.status_code == 200:
                 if self._cookies is None: self._cookies = response.cookies;
                 if response.content:
-                    self.logger.debug("Response content: [%s]" % (response.content.decode('utf-8')))
                     if response.content.startswith('{'):
+                        self.logger.debug("Response content: [%s]" % (response.content.decode('utf-8')))
                         content = response.json(encoding='UTF-8')
                         if content.get('error'):
                             # print(json.dumps(content, indent=4, ensure_ascii=False, encoding='utf-8'))
                             self.logger.error(json.dumps(content, ensure_ascii=False, encoding='utf-8'))
                         return content
-                return response.content
+                    else:
+                        # non JSON data
+                        content = response.content.decode('utf-8')
+                        if response.content.startswith('BEGIN:VCALENDAR'):
+                            msg = u'BEGIN:VCALENDAR ... ({} Bytes)'.format(len(response.content))
+                        else:
+                            if len(content) > 1024:
+                                self.logger.debug("Response content: [%s]" % (content[:32] + '...' + content[-32:]))
+                            else:
+                                self.logger.debug("Response content: [%s]" % (content))
+                        return content
             else:
                 self.logger.error("Response: %d" % (response.status_code))
                 #print(response.status_code)
@@ -133,7 +151,7 @@ class OxHttpAPI(object):
         url = self._server + '/ajax/' + module
         if action:
             url += '?action=' + action
-        self.logger.debug("Request url: %s" % (url))
+        # self.logger.debug("Request url: %s" % (url))
         return url
 
     def _params(self, params=None):
@@ -141,16 +159,20 @@ class OxHttpAPI(object):
         password = params.get('password')
         params['session'] = self._session
         if password: params['password'] = '*****'
-        self.logger.debug("Request params: %s" % (params))
+        # self.logger.debug("Request params: %s" % (params))
         if password: params['password'] = password
         return params
 
     def _request(self, call, module, action, params, data=None):
         try:
+            req_params = self._params(params)
+            req_url = self._url(module, action)
+            req_method = call.func_name.upper()
+            self.logger.debug(u'Request {}: {}'.format(req_method, req_url))
+            if data:
+                self.logger.debug(u'Request body: {}'.format(data))
             self._offline = True
-            self.logger.debug('Request call: [%s] with body %s' % (call.func_name, data))
-            response = call(self._url(module, action), cookies=self._cookies, params=self._params(params), data=data)
-            self.logger.debug('Request url: %s' % (response.request.path_url))
+            response = call(req_url, cookies=self._cookies, params=req_params, data=data)
         except requests.exceptions.RequestException as e:
             self.logger.error("Request exception: %s" % (e))
             return None
@@ -333,14 +355,22 @@ class OxHttpAPI(object):
 
     """ Export module wrapper """
 
-    def export(self, folder_id):
-        format = { "calendar": "ICAL", "contacts": "VCARD"}
-        fld = self.get_folder_by_id(folder_id)
-        if fld is None:
-            raise ValueError(u'Invalid folder id [{}]'.format(folder_id))
-        if not format.has_key(fld.type):
-            raise ValueError("Invalid folder type: [{}]".format(fld.type))
-        return self.get("export", format[type], {'folder': fld.id})
+    def export(self, folder):
+        """
+        Export calendar/contacts folder
+        Args:
+            folder (OxFolder|ID): OxFolder object or folder ID to search for
+        Returns:
+            Folder content in export format
+        """
+        from oxapi import OxFolder, OxExport
+        if not isinstance(folder, OxFolder):
+            folder = self.get_folder_by_id(folder)
+        if folder.module not in OxExport.folder_modules:
+            self._logger.error(u'Export not supported for folder type [{}]'.format(folder.module))
+            return None
+        result = self.get("export", OxExport.folder_modules[folder.module], {'folder': folder.id})
+        return result
 
 # region __main__
 
