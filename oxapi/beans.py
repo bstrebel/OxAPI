@@ -99,6 +99,9 @@ class OxBean(object):
     @property
     def categories(self): return self._data.get('categories','')
 
+    @property
+    def exists(self): return self._data is not None
+
     def get_url(self):
         # https://ox.digitec.de/appsuite/#!&app=io.ox/tasks&folder=1963&id=1963.43941
 
@@ -181,12 +184,14 @@ class OxBean(object):
             return self._columns.index(key)
 
     def __getitem__(self, key):
+        if self._data is None: return None
         if isinstance(self._data, dict):
             return self._data.get(key, None)
         else:
             return self._data[self.index(key)]
 
     def __getattr__(self, key):
+        if self._data is None: return None
         if isinstance(self._data, dict):
             return self._data.get(key)
         else:
