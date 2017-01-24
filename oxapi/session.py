@@ -10,14 +10,14 @@ class OxHttpAPI(object):
     _session = None
 
     @staticmethod
-    def get_session(server=None, user=None, password=None, logger=None):
+    def get_session(server=None, user=None, password=None, logger=None, verify=True):
         if not OxHttpAPI._session:
             if not server: server = os.environ.get('OX_SERVER')
             if not user: user = os.environ.get('OX_USER')
             if not password: password = os.environ.get('OX_PASSWORD')
             # if not logger: logger = logging.getLogger('oxapi')
             if server:
-                OxHttpAPI._session = OxHttpAPI(server, logger=logger)
+                OxHttpAPI._session = OxHttpAPI(server, logger=logger, verify=verify)
                 if user:
                     OxHttpAPI._session.login(user, password)
         return OxHttpAPI._session
@@ -35,13 +35,14 @@ class OxHttpAPI(object):
             msg = re.sub("{'password': .*}", "{'password': '*****'}", msg, re.IGNORECASE)
         return msg
 
-    def __init__(self, server, user=None, password=None, logger=None):
+    def __init__(self, server, user=None, password=None, logger=None, verify=True):
 
         from pyutils import LogAdapter, get_logger
 
         self._server = server
         self._user = user
         self._password = password
+        self._verify = verify
         self._session = None
         self._cookies = None
         self._offline = None
@@ -53,6 +54,9 @@ class OxHttpAPI(object):
             self._logger = logger
 
         self._adapter = LogAdapter(self._logger, {'package': 'oxapi', 'callback': OxHttpAPI.hide_password})
+
+    if sys.version_info < (2,7,9):
+        requests.packages.urllib3.disable_warnings()
 
     def __enter__(self):
         return self
@@ -172,7 +176,7 @@ class OxHttpAPI(object):
             if data:
                 self.logger.debug(u'Request body: {}'.format(data))
             self._offline = True
-            response = call(req_url, cookies=self._cookies, params=req_params, data=data)
+            response = call(req_url, cookies=self._cookies, params=req_params, data=data, verify=self._verify)
         except requests.exceptions.RequestException as e:
             self.logger.error("Request exception: %s" % (e))
             return None
